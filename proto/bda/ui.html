@@ -1,0 +1,36 @@
+<meta charset="utf-8">
+ <head>
+    <title>Xu Fu - Forgentum</title>
+    <link rel='stylesheet' href='ui.css' type='text/css'></link>
+    <script type='text/javascript' src='jquery-1.7.1.min.js'></script> 
+    <link type="text/css" href="jquery-ui/css/ui-lightness/jquery-ui-1.8.18.custom.css" rel="Stylesheet" />	  <script type="text/javascript" src="jquery-ui/js/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="jquery-ui/js/jquery-ui-1.8.18.custom.min.js"></script>    
+    <script type='text/javascript' src='ui.js'></script> 
+    <script type='text/javascript'>
+      $(document).ready(function() {
+        //alert(ui);
+        ui.load();
+      }); 
+   </script>
+  </head>
+  
+ <body>
+ <div id="dialog-detail" title="Data details">
+	<p>
+		<span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+	</p>
+</div>
+    <h3>Xu Fu</h3>
+    <p>Start typing to find information</p>
+    <input type='text' size='50' id='query'></input>
+    <div id='results' >
+        <div id='resultsMeta' class='inline'>
+        </div><br/>
+        <div id='links' class='inline'>
+        </div>
+    </div>
+    
+    <div id='footer'>
+        &copy 2012 <a href='http://www.forgentum.com'>Forgentum</a>
+    </div>
+  </body>

@@ -1,0 +1,9 @@
+protoype -
+
+first run - 
+stats: > db.corpus.distinct("hemsEncId").length
+3562
+> db.corpus.distinct("ncid").length
+3516
+
+runtime approx: 26 mins
