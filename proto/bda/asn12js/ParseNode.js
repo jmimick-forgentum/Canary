@@ -1,3 +1,4 @@
+// - test
 function ParseNode(parent,name,value) {
 	if ( value.match("^{") ) {
 		value = ParseNode(this, 1, value);

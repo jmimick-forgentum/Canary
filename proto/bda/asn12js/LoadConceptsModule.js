@@ -3,12 +3,11 @@ var path = require('path');
 var fs = require('fs');
 var mongojs = require('mongojs');
 
-
 var db = 'concepts';
 var colls = [ 'corpus', 'ncidref'];
 
 //var BATCH_DONE = false;
-var ncidref = {};
+//var ncidref = {};
 
 /*
 	Better - idea - just parse out the concepts from the messages.
@@ -43,7 +42,7 @@ function CrunchMessage(fileName,fileLines, ncidref) {
 		}
 		if ( line.indexOf('ncid')!=-1 ) {
 			var p = line.split(' ');
-			var ncid = p[1];
+			var ncid = parseInt(p[1]);
 			if ( !cur_ncids[ncid] ) {
 				cur_ncids[ncid]=1;
 			} else {
@@ -62,7 +61,7 @@ function CrunchMessage(fileName,fileLines, ncidref) {
 			}
 			if ( !ncidref[ncid] ) {
 				ncidref[ncid] = { ncid: ncid, description: desc, count : 0 };
-			} else if ( ncidref[ncid] && (ncidref[ncid].description.join() != desc.join()) ) {
+			/*} else if ( ncidref[ncid] && (ncidref[ncid].description.join() != desc.join()) ) {
 				// this case means we hit this ncid already, but now a different 
 				// description
 				//console.log( ncid + ' but different desc' + util.inspect(ncidref[ncid]));
@@ -70,6 +69,7 @@ function CrunchMessage(fileName,fileLines, ncidref) {
 				//console.log( ncid + ' after ' + util.inspect(ncidref[ncid]));
 			} else {
 				//console.log( ncid + ' was already in the cache');
+			*/
 			}
 			ncidref[ncid].count++;
 		}
@@ -77,11 +77,43 @@ function CrunchMessage(fileName,fileLines, ncidref) {
 	return corpi;
 }
 
+function saveNcidRef(conceptsDB,ncidref) {
+
+	/*
+	conceptsDB.ncidref.save(ncidref, function(err,saved) {
+		if ( err || !saved ) { 
+				console.error("ncidref Error - could not save " + saved + err);
+	    	} else {
+	    		process.stdout.write('<#>');
+	    	}
+	});*/
+	/**/
+	for(var ncid in ncidref) {
+		var c = ncidref[ncid];
+		//console.log( util.inspect(c.ncid));
+		var q = { ncid: c.ncid };
+		//debugger;
+		conceptsDB.ncidref.update(q, c, {safe:true,upsert:true}, function(err, saved) {
+			if ( err || !saved ) { 
+				console.error("ncidref Error - could not save:" + saved +' err='+ err);
+				console.error(conceptsDB.getlasterror );
+	    	} else {
+	    		process.stdout.write('#');
+	    	}
+	  	});
+	
+	}/**/
+} 
 
 
-exports.readASN1Message = function (data, fn) {
-	var conceptsDB = mongojs.connect( db, colls );
-	debugger;
+exports.readASN1Message = function (data, fn, conceptsDB) {
+	var closeDB = false;
+	if (!conceptsDB) {
+		conceptsDB = mongojs.connect( db, colls );
+		closeDB = true;
+	}
+	//debugger;
+	var ncidref = {};
 	var c = data.split('\n');
 	var corpi = CrunchMessage(fn,c,ncidref);
 	//console.log( dat + ' found ' + corpi.length + ' concepts');
@@ -93,15 +125,23 @@ exports.readASN1Message = function (data, fn) {
 		//debugger;
 		var c = corpi[i];
 		conceptsDB.corpus.save(c, function(err, saved) {
-			debugger;
+			//debugger;
 	    	if ( err || !saved ) { 
-				console.log("Error - could not save " + c + err);
+				console.error("Error - could not save " + c + err);
 	    	} else {
-	    		console.log('Saved corpi id='+saved._id);
+	    		process.stdout.write('.');
+	    		if ( (i+1) === corpi.length ) {
+	    			debugger;
+					saveNcidRef(conceptsDB,ncidref)	    			
 	    		}
+	    	}
 	  	});
 	}
-	conceptsDB.close();
+
+
+	if ( closeDB ) {
+		conceptsDB.close();
+	}
 }
 
 

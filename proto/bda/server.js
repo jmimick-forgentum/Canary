@@ -17,6 +17,12 @@ console.log( 'query='+util.inspect(query) );
 var uiFilePath = './ui.html';
 function onRequest(request, response) {
   var uri = url.parse(request.url).pathname;
+  console.log("server -->");
+  var urlObj = url.parse(request.url, true);
+  console.dir(urlObj);
+
+  console.log("server -->");
+  
   console.log("Request received for uri=" + uri);
   if ( uri === '/' ) { uri = uiFilePath; }
   var filename = path.join(process.cwd(), uri);
@@ -36,7 +42,16 @@ function onRequest(request, response) {
         query.details(uri.slice(4), response);
       }
       //response.end();
-   } else {
+   } else if ( urlObj.query['term'] ) {
+      var conceptSearch = require('./asn12js/canarySearch.js');
+      conceptSearch.jsonConceptSearch( urlObj.query['term'], response);
+    } else if ( urlObj.query['ncid'] ) {
+      var conceptSearch = require('./asn12js/canarySearch.js');
+      conceptSearch.jsonEncounterWithNcidSearch( urlObj.query['ncid'], response);
+    } else if ( urlObj.query['ncidPower'] ) {
+      var conceptSearch = require('./asn12js/canarySearch.js');
+      conceptSearch.encPwrConcept( urlObj.query['ncidPower'], response);
+    } else {
        path.exists(filename, function(exists) {
         if ( exists ) {
           var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
